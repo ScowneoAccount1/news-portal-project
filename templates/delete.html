@@ -1,0 +1,42 @@
+<!--  наследуемся от шаблона default.html, который мы создавали ещё во времена flatpages -->
+{% extends 'flatpages/default.html' %}
+
+
+<!-- Название у нас будет products -->
+{% block title %}
+Products
+{% endblock title %}
+
+<!-- В контенте на странице мы выводим сам товар, ID которого было передано в адрес -->
+{% block content %}
+
+    <h2>Вы действительно хотите удалить данный товар?</h2>
+    <table>
+        <thead>
+            <th>
+                Заголовок
+            </th>
+            <th>
+                Дата публикации
+            </th>
+            <th>
+                Cодержание
+            </th>
+        </thead>
+        <tr>
+            <td>
+                {{ post.heading }}
+            </td>
+            <td>
+                {{ post.date_create|date:'d M Y' }}
+            </td>
+            <td>
+                {{ post.text }}
+            </td>
+        </tr>
+    </table>
+ 
+    <form method="POST">
+        {% csrf_token %}
+        <input type="submit" value="подтвердить"></form>
+{% endblock content %}

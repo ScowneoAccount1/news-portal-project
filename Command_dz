@@ -1,0 +1,116 @@
+1. Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+В консоле ввести from django.contrib.auth.models import User
+После этого есть возможность создавать юзеров через консоль.
+
+alex_user = User.objects.create_user(username = "Alex", email = 'aleksey@mail.ru', password = 'aleks')
+den_user = User.objects.create_user(username = "Den", email = 'dima@mail.ru', password = 'dimas')
+
+2. Создать два объекта модели Author, связанные с пользователями.
+
+В консоле ввести from news.models import Author или from news.models import *
+После этого можно создать Автора
+alex = Author.objects.create(user = alex_user)
+den = Author.objects.create(user = den_user)
+
+3. Добавить 4 категории в модель Category.
+
+В консоле ввести from news.models import Category
+Создаем категории
+cat_sport = Category.objects.create(name_category= 'Спорт')
+cat_auto = Category.objects.create(name_category= 'Авто')
+cat_moto = Category.objects.create(name_category= 'Мото')
+cat_it = Category.objects.create(name_category= 'IT')
+
+
+4. Добавить 2 статьи и 1 новость.
+
+text_article_sport = '''Статья про спорт_Статья про спорт_Статья про спорт_Статья про спорт_Статья про спорт_Статья про спорт_Статья про спорт и кино'''
+text_article_auto_moto ='''Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто_Статья про мото авто.'''
+text_news_it = '''Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT_Новость про IT.'''
+
+Вводим в консоль from news.models import Post
+
+article_alex = Post.objects.create(post_user = alex, is_news = Post.article, heading = "статья_спорт_Алексей", text = text_article_sport)
+article_dimas = Post.objects.create(post_user = den, is_news = Post.article, heading = "статья_музыка_Дмитрий", text = text_article_auto_moto)
+news_dimas = Post.objects.create(post_user = den, is_news = Post.news, heading = "новость_IT_Дмитрий", text = text_news_it)
+
+5. Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+
+Вводим в консоль from news.models import PostCategory
+
+PostCategory.objects.create(post_post = article_alex, post_caty = cat_sport)
+PostCategory.objects.create(post_post = article_dimas, post_caty = cat_auto)
+PostCategory.objects.create(post_post = article_dimas, post_caty = cat_moto)
+PostCategory.objects.create(post_post = news_dimas, post_caty = cat_it)
+
+6. Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+
+from news.models import Comment
+
+comment1 = Comment.objects.create(post = article_alex, user = den.user, text = "коммент Дмитрия №1 к статье Алексея")
+comment2 = Comment.objects.create(post = article_dimas, user = alex.user, text = "коммент Алексея №2 к статье Дмитрия")
+comment3 = Comment.objects.create(post = news_dimas, user = den.user, text = "коммент Дмитрия №3 к новости Дмитрия")
+comment4 = Comment.objects.create(post = news_dimas, user = alex.user, text = "коммент Алексея №4 к новости Дмитрия")
+
+comment2.like()
+comment2.like()
+comment2.like()
+comment1.like()
+comment1.like()
+comment1.like()
+comment1.like()
+comment1.like()
+comment1.like()
+comment3.like()
+comment3.like()
+comment3.like()
+comment3.like()
+comment4.like()
+news_dimas.like()
+news_dimas.like()
+news_dimas.like()
+news_dimas.like()
+news_dimas.like()
+article_alex.like()
+article_alex.like()
+article_dimas.like()
+comment3.dislike()
+comment1.dislike()
+
+
+rating_alex = (sum([post.rating_post*3 for post in Post.objects.filter(post_user=alex)])
+                    + sum([comment.rating for comment in Comment.objects.filter(user=alex.user)])
+                    + sum([comment.rating for comment in Comment.objects.filter(post__post_user=alex)]))
+
+alex.update_rating(rating_alex)
+
+rating_den = (sum([post.rating_post*3 for post in Post.objects.filter(post_user=den)])
+                    + sum([comment.rating for comment in Comment.objects.filter(user=den.user)])
+                    + sum([comment.rating for comment in Comment.objects.filter(post__post_user=den)]))
+
+den.update_rating(rating_den)
+
+
+best_author = Author.objects.all().order_by('-rating_user')[0]
+
+print("Лучший автор")
+print("username:", best_author.user.username)
+print("Рейтинг:", best_author.rating_user)
+print("")
+
+best_article = Post.objects.filter(is_news = Post.article).order_by('-rating_post')[0]
+print("Лучшая статья")
+print("Дата:", best_article.date_create)
+print("Автор:", best_article.post_user.user.username)
+print("Рейтинг:", best_article.rating_post)
+print("Заголовок:", best_article.heading)
+print("Превью:", best_article.preview())
+print("")
+
+print("Комментарии к ней")
+for comment in Comment.objects.filter(post = best_article):
+     print("Дата:", comment.create)
+     print("Автор:", comment.user.username)
+     print("Рейтинг:", comment.rating)
+     print("Комментарий:", comment.text)
+     print("")
